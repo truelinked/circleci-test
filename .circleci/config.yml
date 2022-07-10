@@ -17,7 +17,14 @@ jobs:
             aws ecr get-login-password --region eu-central-1 | docker login --username AWS --password-stdin 667251554135.dkr.ecr.eu-central-1.amazonaws.com
             docker push "667251554135.dkr.ecr.eu-central-1.amazonaws.com/test-image:${CIRCLE_WORKFLOW_ID}"
       - aws-ecs/update-service:
-          cluster-name: " ecs-us-east-1-qa-common"
+          cluster-name: "ecs-us-east-1-qa-common"
+          container-image-name-updates: "container=test-ctr,tag=${CIRCLE_WORKFLOW_ID}"
+          service-name: "test-svc"
+          family: " test-td"  #task defination name
+          verify-revision-is-deployed: true
+      - run: export AWS_DEFAULT_REGION=eu-central-1
+      - aws-ecs/update-service:
+          cluster-name: "ecs-eu-central-1-qa-common"
           container-image-name-updates: "container=test-ctr,tag=${CIRCLE_WORKFLOW_ID}"
           service-name: "test-svc"
           family: " test-td"  #task defination name
