@@ -1,8 +1,16 @@
 version: 2.1
+orbs:
+  aws-ecs: circleci/aws-ecs@2.3.0
 jobs:
   build:
     machine:
       image: ubuntu-2204:current
     steps:
       - checkout
-      - run: docker build . -t "667251554135.dkr.ecr.us-east-1.amazonaws.com/test-image:${CIRCLE_WORKFLOW_ID}"
+      - run: |
+          docker build . -t "667251554135.dkr.ecr.us-east-1.amazonaws.com/test-image:${CIRCLE_WORKFLOW_ID}"
+          aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 667251554135.dkr.ecr.us-east-1.amazonaws.com
+          docker push "667251554135.dkr.ecr.us-east-1.amazonaws.com/test-image:${CIRCLE_WORKFLOW_ID}"
+          docker tag "667251554135.dkr.ecr.us-east-1.amazonaws.com/test-image:${CIRCLE_WORKFLOW_ID}" "667251554135.dkr.ecr.eu-central-1.amazonaws.com/test-image:${CIRCLE_WORKFLOW_ID}"
+          aws ecr get-login-password --region eu-central-1 | docker login --username AWS --password-stdin 667251554135.dkr.ecr.eu-central-1.amazonaws.com
+          docker push "667251554135.dkr.ecr.eu-central-1.amazonaws.com/test-image:${CIRCLE_WORKFLOW_ID}"
