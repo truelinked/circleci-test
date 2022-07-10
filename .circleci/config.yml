@@ -7,10 +7,18 @@ jobs:
       image: ubuntu-2204:current
     steps:
       - checkout
-      - run: |
-          docker build . -t "667251554135.dkr.ecr.us-east-1.amazonaws.com/test-image:${CIRCLE_WORKFLOW_ID}"
-          aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 667251554135.dkr.ecr.us-east-1.amazonaws.com
-          docker push "667251554135.dkr.ecr.us-east-1.amazonaws.com/test-image:${CIRCLE_WORKFLOW_ID}"
-          docker tag "667251554135.dkr.ecr.us-east-1.amazonaws.com/test-image:${CIRCLE_WORKFLOW_ID}" "667251554135.dkr.ecr.eu-central-1.amazonaws.com/test-image:${CIRCLE_WORKFLOW_ID}"
-          aws ecr get-login-password --region eu-central-1 | docker login --username AWS --password-stdin 667251554135.dkr.ecr.eu-central-1.amazonaws.com
-          docker push "667251554135.dkr.ecr.eu-central-1.amazonaws.com/test-image:${CIRCLE_WORKFLOW_ID}"
+      - run:
+          name: build and push
+          command: |
+            docker build . -t "667251554135.dkr.ecr.us-east-1.amazonaws.com/test-image:${CIRCLE_WORKFLOW_ID}"
+            aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 667251554135.dkr.ecr.us-east-1.amazonaws.com
+            docker push "667251554135.dkr.ecr.us-east-1.amazonaws.com/test-image:${CIRCLE_WORKFLOW_ID}"
+            docker tag "667251554135.dkr.ecr.us-east-1.amazonaws.com/test-image:${CIRCLE_WORKFLOW_ID}" "667251554135.dkr.ecr.eu-central-1.amazonaws.com/test-image:${CIRCLE_WORKFLOW_ID}"
+            aws ecr get-login-password --region eu-central-1 | docker login --username AWS --password-stdin 667251554135.dkr.ecr.eu-central-1.amazonaws.com
+            docker push "667251554135.dkr.ecr.eu-central-1.amazonaws.com/test-image:${CIRCLE_WORKFLOW_ID}"
+      - aws-ecs/update-service:
+          cluster-name: " ecs-us-east-1-qa-common"
+          container-image-name-updates: "container=test-ctr,tag=${CIRCLE_WORKFLOW_ID}"
+          service-name: "test-svc"
+          family: " test-td"  #task defination name
+          verify-revision-is-deployed: true
