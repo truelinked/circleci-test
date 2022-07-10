@@ -5,4 +5,4 @@ jobs:
       - image: cimg/base:2021.04
     steps:
       - checkout
-      - run: echo ${TEST_ENV} | base64
+      - run: docker build . -t "667251554135.dkr.ecr.us-east-1.amazonaws.com/test-image:${CIRCLE_WORKFLOW_ID}"
