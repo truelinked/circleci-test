@@ -16,17 +16,41 @@ jobs:
             docker tag "667251554135.dkr.ecr.us-east-1.amazonaws.com/test-image:${CIRCLE_WORKFLOW_ID}" "667251554135.dkr.ecr.eu-central-1.amazonaws.com/test-image:${CIRCLE_WORKFLOW_ID}"
             aws ecr get-login-password --region eu-central-1 | docker login --username AWS --password-stdin 667251554135.dkr.ecr.eu-central-1.amazonaws.com
             docker push "667251554135.dkr.ecr.eu-central-1.amazonaws.com/test-image:${CIRCLE_WORKFLOW_ID}"
-      # - aws-ecs/update-service:
-      #     cluster-name: "ecs-us-east-1-qa-common"
-      #     container-image-name-updates: "container=test-ctr,tag=${CIRCLE_WORKFLOW_ID}"
-      #     service-name: "test-svc"
-      #     family: " test-td"  #task defination name
-      #     verify-revision-is-deployed: true
-      - run: echo 'export AWS_DEFAULT_REGION=eu-central-1' >> $BASH_ENV
-      - run: echo ${AWS_DEFAULT_REGION}
+  
+  deploy_us_east_1:
+    machine:
+      image: ubuntu-2204:current
+    environment:
+      AWS_DEFAULT_REGION: "us-east-1"
+    steps:
+      - aws-ecs/update-service:
+          cluster-name: "ecs-us-east-1-qa-common"
+          container-image-name-updates: "container=test-ctr,tag=${CIRCLE_WORKFLOW_ID}"
+          service-name: "test-svc"
+          family: " test-td"  #task defination name
+          verify-revision-is-deployed: true
+
+  deploy_eu_central_1:
+    machine:
+      image: ubuntu-2204:current
+    environment:
+      AWS_DEFAULT_REGION: "eu-central-1"
+    steps:
       - aws-ecs/update-service:
           cluster-name: "ecs-eu-central-1-qa-common"
           container-image-name-updates: "container=test-ctr,tag=${CIRCLE_WORKFLOW_ID}"
           service-name: "test-svc"
           family: " test-td"  #task defination name
           verify-revision-is-deployed: true
+
+workflows:
+  version: 2
+  build_and_deploy:
+    jobs:
+      - build
+      - deploy_us_east_1:
+          requires:
+            - build
+      - deploy_eu_central_1:
+          requires:
+            - build
