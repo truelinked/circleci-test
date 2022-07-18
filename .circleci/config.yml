@@ -52,11 +52,13 @@ jobs:
       - aws-ecs/update-task-definition:
           family: "td-test-migrations"
           container-image-name-updates: "container=test-ctr,tag=${CIRCLE_WORKFLOW_ID}"
-      - aws-ecs/run-task:
-          cluster: "ecs-eu-central-1-qa-common"
-          security-group-ids: sg-04263255ba57012d2
-          subnet-ids: 'subnet-0d837e7dfb75fb8b9, subnet-04d95895453c172c6'
-          task-definition: td-test-migrations
+      - run:
+          name: Run migration
+          command: |
+            aws ecs run-task \
+              --cluster ecs-eu-central-1-qa-common \
+              --network-configuration "awsvpcConfiguration={subnets=[subnet-0d837e7dfb75fb8b9,subnet-04d95895453c172c6],securityGroups=[sg-04263255ba57012d2],assignPublicIp=ENABLED}" \
+              --task-definition td-test-migrations:4
 
 workflows:
   version: 2
