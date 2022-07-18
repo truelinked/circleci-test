@@ -69,4 +69,6 @@ workflows:
       - deploy_eu_central_1:
           requires:
             - build
-      - run_migrations
+      - run_migrations:
+          requires:
+            - build
