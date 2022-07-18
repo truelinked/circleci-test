@@ -58,7 +58,7 @@ jobs:
             aws ecs run-task \
               --cluster ecs-eu-central-1-qa-common \
               --network-configuration "awsvpcConfiguration={subnets=[subnet-0d837e7dfb75fb8b9,subnet-04d95895453c172c6],securityGroups=[sg-04263255ba57012d2],assignPublicIp=ENABLED}" \
-              --task-definition td-test-migrations:4
+              --task-definition td-test-migrations
 
 workflows:
   version: 2
